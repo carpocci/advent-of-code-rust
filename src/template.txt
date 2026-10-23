@@ -1,11 +1,26 @@
 advent_of_code::solution!(%DAY_NUMBER%);
 
-pub fn part_one(input: &str) -> Option<u64> {
-    None
+type Answer = usize;
+
+#[derive(PartialEq)]
+enum Part {
+    One = 1,
+    Two = 2,
 }
 
-pub fn part_two(input: &str) -> Option<u64> {
-    None
+fn solve(input: &str, part: Part, debug: bool) -> Option<Answer> {
+    match part {
+        Part::One => None,
+        Part::Two => None,
+    }
+}
+
+pub fn part_one(input: &str) -> Option<Answer> {
+    solve(input, Part::One, false)
+}
+
+pub fn part_two(input: &str) -> Option<Answer> {
+    solve(input, Part::Two, false)
 }
 
 #[cfg(test)]
@@ -14,13 +29,15 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        let result = part_one(&advent_of_code::template::read_file("examples", DAY));
+        let input = advent_of_code::template::read_file("examples", DAY);
+        let result = solve(&input, Part::One, true);
         assert_eq!(result, None);
     }
 
     #[test]
     fn test_part_two() {
-        let result = part_two(&advent_of_code::template::read_file("examples", DAY));
+        let input = advent_of_code::template::read_file("examples", DAY);
+        let result = solve(&input, Part::Two, true);
         assert_eq!(result, None);
     }
 }

@@ -21,11 +21,19 @@ pub fn handle(day: Option<Day>, run_all: bool, store: bool) {
         |day| HashSet::from([day]),
     );
 
-    let timings = run_multi(&days_to_run, true, true).unwrap();
+    let timings = match run_multi(&days_to_run, true, true) {
+        Ok(Some(timings)) => timings,
+        _ => {
+            eprintln!("Failed to run benchmarks");
+            return;
+        }
+    };
 
     if store {
         let merged_timings = stored_timings.merge(&timings);
-        merged_timings.store_file().unwrap();
+        if let Err(e) = merged_timings.store_file() {
+            eprintln!("Failed to store timings: {}", e);
+        }
 
         println!();
         match readme_benchmarks::update(merged_timings) {

@@ -144,7 +144,11 @@ fn submit_result<T: Display>(
         process::exit(1);
     }
 
-    let part_index = args.iter().position(|x| x == "--submit").unwrap() + 1;
+    let Some(part_index) = args.iter().position(|x| x == "--submit") else {
+        eprintln!("Unexpected command-line input. Format: cargo solve 1 --submit 1");
+        process::exit(1);
+    };
+    let part_index = part_index + 1;
 
     let Ok(part_submit) = args[part_index].parse::<u8>() else {
         eprintln!("Unexpected command-line input. Format: cargo solve 1 --submit 1");

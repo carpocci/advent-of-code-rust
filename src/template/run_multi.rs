@@ -7,32 +7,34 @@ use super::{
     timings::{Timing, Timings},
 };
 
-pub fn run_multi(days_to_run: &HashSet<Day>, is_release: bool, is_timed: bool) -> Option<Timings> {
+pub fn run_multi(
+    days_to_run: &HashSet<Day>,
+    is_release: bool,
+    is_timed: bool,
+) -> Result<Option<Timings>, Error> {
     let mut timings: Vec<Timing> = Vec::with_capacity(days_to_run.len());
 
     let mut need_space = false;
 
     // NOTE: use non-duplicate, sorted day values.
-    all_days()
-        .filter(|day| days_to_run.contains(day))
-        .for_each(|day| {
-            if need_space {
-                println!();
-            }
-            need_space = true;
+    for day in all_days().filter(|day| days_to_run.contains(day)) {
+        if need_space {
+            println!();
+        }
+        need_space = true;
 
-            println!("{ANSI_BOLD}Day {day}{ANSI_RESET}");
-            println!("------");
+        println!("{ANSI_BOLD}Day {day}{ANSI_RESET}");
+        println!("------");
 
-            let output = child_commands::run_solution(day, is_timed, is_release).unwrap();
+        let output = child_commands::run_solution(day, is_timed, is_release)?;
 
-            if output.is_empty() {
-                println!("Not solved.");
-            } else {
-                let val = child_commands::parse_exec_time(&output, day);
-                timings.push(val);
-            }
-        });
+        if output.is_empty() {
+            println!("Not solved.");
+        } else {
+            let val = child_commands::parse_exec_time(&output, day);
+            timings.push(val);
+        }
+    }
 
     if is_timed {
         let timings = Timings { data: timings };
@@ -40,9 +42,9 @@ pub fn run_multi(days_to_run: &HashSet<Day>, is_release: bool, is_timed: bool) -
         println!(
             "\n{ANSI_BOLD}Total (Run):{ANSI_RESET} {ANSI_ITALIC}{total_millis:.2}ms{ANSI_RESET}"
         );
-        Some(timings)
+        Ok(Some(timings))
     } else {
-        None
+        Ok(None)
     }
 }
 
@@ -112,17 +114,18 @@ pub mod child_commands {
 
         let thread = thread::spawn(move || {
             stderr.lines().for_each(|line| {
-                eprintln!("{}", line.unwrap());
+                if let Ok(line) = line {
+                    eprintln!("{}", line);
+                }
             });
         });
 
-        for line in stdout.lines() {
-            let line = line.unwrap();
+        for line in stdout.lines().map_while(Result::ok) {
             println!("{line}");
             output.push(line);
         }
 
-        thread.join().unwrap();
+        let _ = thread.join();
         cmd.wait()?;
 
         Ok(output)
@@ -250,8 +253,8 @@ pub mod child_commands {
                 day!(1),
             );
             assert_approx_eq!(res.total_nanos, 0_f64);
-            assert_eq!(res.part_1.is_none(), true);
-            assert_eq!(res.part_2.is_none(), true);
+            assert!(res.part_1.is_none());
+            assert!(res.part_2.is_none());
         }
     }
 }

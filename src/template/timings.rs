@@ -253,7 +253,7 @@ mod tests {
         #[test]
         fn serializes_timings() {
             let timings = get_mock_timings();
-            let value = JsonValue::try_from(timings).unwrap();
+            let value = JsonValue::from(timings);
             assert_eq!(
                 value
                     .get::<HashMap<String, JsonValue>>()
@@ -285,7 +285,7 @@ mod tests {
                 }],
             };
 
-            assert_eq!(timings.is_day_complete(&day!(1)), true);
+            assert!(timings.is_day_complete(day!(1)));
         }
 
         #[test]
@@ -299,7 +299,7 @@ mod tests {
                 }],
             };
 
-            assert_eq!(timings.is_day_complete(&day!(1)), false);
+            assert!(!timings.is_day_complete(day!(1)));
         }
 
         #[test]
@@ -313,7 +313,7 @@ mod tests {
                 }],
             };
 
-            assert_eq!(timings.is_day_complete(&day!(1)), false);
+            assert!(!timings.is_day_complete(day!(1)));
         }
     }
 
