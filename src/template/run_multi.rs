@@ -1,6 +1,6 @@
 use std::{collections::HashSet, io};
 
-use crate::template::{ANSI_BOLD, ANSI_ITALIC, ANSI_RESET, Day};
+use crate::template::{Day, ANSI_BOLD, ANSI_ITALIC, ANSI_RESET};
 
 use super::{
     all_days,
@@ -69,7 +69,7 @@ pub fn get_path_for_bin(day: Day) -> String {
 /// All solutions live in isolated binaries.
 /// This module encapsulates interaction with these binaries, both invoking them as well as parsing the timing output.
 pub mod child_commands {
-    use super::{Error, get_path_for_bin};
+    use super::{get_path_for_bin, Error};
     use crate::template::Day;
     use std::{
         io::{BufRead, BufReader},
@@ -136,6 +136,7 @@ pub mod child_commands {
             day,
             part_1: None,
             part_2: None,
+            part_3: None,
             total_nanos: 0_f64,
         };
 
@@ -159,6 +160,8 @@ pub mod child_commands {
                     timings.part_1 = Some(timing_str.into());
                 } else if part.contains("Part 2") {
                     timings.part_2 = Some(timing_str.into());
+                } else if part.contains("Part 3") {
+                    timings.part_3 = Some(timing_str.into());
                 }
 
                 timings.total_nanos += nanos;
@@ -253,8 +256,8 @@ pub mod child_commands {
                 day!(1),
             );
             assert_approx_eq!(res.total_nanos, 0_f64);
-            assert!(res.part_1.is_none());
-            assert!(res.part_2.is_none());
+            assert_eq!(res.part_1.is_none(), true);
+            assert_eq!(res.part_2.is_none(), true);
         }
     }
 }

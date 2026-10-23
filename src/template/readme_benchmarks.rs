@@ -59,18 +59,19 @@ fn construct_table(prefix: &str, timings: Timings, total_millis: f64) -> String 
         MARKER.into(),
         header,
         String::new(),
-        "| Day | Part 1 | Part 2 |".into(),
-        "| :---: | :---: | :---:  |".into(),
+        "| Day | Part 1 | Part 2 | Part 3 |".into(),
+        "| :---: | :---: | :---: | :---: |".into(),
     ];
 
     for timing in timings.data {
         let path = get_path_for_bin(timing.day);
         lines.push(format!(
-            "| [Day {}]({}) | `{}` | `{}` |",
+            "| [Day {}]({}) | `{}` | `{}` | `{}` |",
             timing.day.into_inner(),
             path,
             timing.part_1.unwrap_or_else(|| "-".into()),
-            timing.part_2.unwrap_or_else(|| "-".into())
+            timing.part_2.unwrap_or_else(|| "-".into()),
+            timing.part_3.unwrap_or_else(|| "-".into()),
         ));
     }
 
@@ -109,19 +110,22 @@ mod tests {
                     day: day!(1),
                     part_1: Some("10ms".into()),
                     part_2: Some("20ms".into()),
-                    total_nanos: 3e+10,
+                    part_3: Some("30ms".into()),
+                    total_nanos: 6e+10,
                 },
                 Timing {
                     day: day!(2),
                     part_1: Some("30ms".into()),
                     part_2: Some("40ms".into()),
-                    total_nanos: 7e+10,
+                    part_3: Some("50ms".into()),
+                    total_nanos: 12e+10,
                 },
                 Timing {
                     day: day!(4),
                     part_1: Some("40ms".into()),
                     part_2: Some("50ms".into()),
-                    total_nanos: 9e+10,
+                    part_3: Some("60ms".into()),
+                    total_nanos: 15e+10,
                 },
             ],
         }
@@ -145,7 +149,7 @@ mod tests {
     fn updates_empty_benchmarks() {
         let mut s = format!("foo\nbar\n{}{}\nbaz", MARKER, MARKER);
         update_content(&mut s, get_mock_timings(), 190.0).unwrap();
-        assert!(s.contains("## Benchmarks"));
+        assert_eq!(s.contains("## Benchmarks"), true);
     }
 
     #[test]
@@ -167,11 +171,11 @@ mod tests {
             "<!--- benchmarking table --->",
             "## Benchmarks",
             "",
-            "| Day | Part 1 | Part 2 |",
-            "| :---: | :---: | :---:  |",
-            "| [Day 1](./src/bin/01.rs) | `10ms` | `20ms` |",
-            "| [Day 2](./src/bin/02.rs) | `30ms` | `40ms` |",
-            "| [Day 4](./src/bin/04.rs) | `40ms` | `50ms` |",
+            "| Day | Part 1 | Part 2 | Part 3 |",
+            "| :---: | :---: | :---: | :---: |",
+            "| [Day 1](./src/bin/01.rs) | `10ms` | `20ms` | `30ms` |",
+            "| [Day 2](./src/bin/02.rs) | `30ms` | `40ms` | `50ms` |",
+            "| [Day 4](./src/bin/04.rs) | `40ms` | `50ms` | `60ms` |",
             "",
             "**Total: 190.00ms**",
             "<!--- benchmarking table --->",

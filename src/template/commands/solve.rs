@@ -23,12 +23,15 @@ pub fn handle(day: Day, release: bool, dhat: bool, submit_part: Option<u8>) {
         cmd_args.push(submit_part.to_string());
     }
 
-    let mut cmd = Command::new("cargo")
+    let mut cmd = match Command::new("cargo")
         .args(&cmd_args)
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .spawn()
-        .unwrap();
+    {
+        Ok(cmd) => cmd,
+        Err(_) => unreachable!(),
+    };
 
-    cmd.wait().unwrap();
+    let _ = cmd.wait();
 }

@@ -11,6 +11,7 @@ pub struct Timing {
     pub day: Day,
     pub part_1: Option<String>,
     pub part_2: Option<String>,
+    pub part_3: Option<String>,
     pub total_nanos: f64,
 }
 
@@ -63,7 +64,7 @@ impl Timings {
     pub fn is_day_complete(&self, day: Day) -> bool {
         self.data
             .iter()
-            .any(|t| t.day == day && t.part_1.is_some() && t.part_2.is_some())
+            .any(|t| t.day == day && t.part_1.is_some() && t.part_2.is_some() && t.part_3.is_some())
     }
 }
 
@@ -116,6 +117,7 @@ impl From<&Timing> for JsonValue {
 
         let part_1 = value.part_1.clone().map(JsonValue::String);
         let part_2 = value.part_2.clone().map(JsonValue::String);
+        let part_3 = value.part_3.clone().map(JsonValue::String);
 
         map.insert(
             "part_1".into(),
@@ -128,6 +130,14 @@ impl From<&Timing> for JsonValue {
         map.insert(
             "part_2".into(),
             match part_2 {
+                Some(x) => x,
+                None => JsonValue::Null,
+            },
+        );
+
+        map.insert(
+            "part_3".into(),
+            match part_3 {
                 Some(x) => x,
                 None => JsonValue::Null,
             },
@@ -161,6 +171,11 @@ impl TryFrom<&JsonValue> for Timing {
             .map(|v| if v.is_null() { None } else { v.get::<String>() })
             .ok_or("Expected timing.part_2 to be null or string.")?;
 
+        let part_3 = json
+            .get("part_3")
+            .map(|v| if v.is_null() { None } else { v.get::<String>() })
+            .ok_or("Expected timing.part_3 to be null or string.")?;
+
         let total_nanos = json
             .get("total_nanos")
             .and_then(|v| v.get::<f64>().copied())
@@ -170,6 +185,7 @@ impl TryFrom<&JsonValue> for Timing {
             day,
             part_1: part_1.cloned(),
             part_2: part_2.cloned(),
+            part_3: part_3.cloned(),
             total_nanos,
         })
     }
@@ -190,18 +206,21 @@ mod tests {
                     day: day!(1),
                     part_1: Some("10ms".into()),
                     part_2: Some("20ms".into()),
-                    total_nanos: 3e+10,
+                    part_3: Some("30ms".into()),
+                    total_nanos: 6e+10,
                 },
                 Timing {
                     day: day!(2),
                     part_1: Some("30ms".into()),
                     part_2: Some("40ms".into()),
+                    part_3: None,
                     total_nanos: 7e+10,
                 },
                 Timing {
                     day: day!(4),
                     part_1: Some("40ms".into()),
                     part_2: None,
+                    part_3: None,
                     total_nanos: 4e+10,
                 },
             ],
@@ -213,7 +232,7 @@ mod tests {
 
         #[test]
         fn handles_json_timings() {
-            let json = r#"{ "data": [{ "day": "01", "part_1": "1ms", "part_2": null, "total_nanos": 1000000000 }] }"#.to_string();
+            let json = r#"{ "data": [{ "day": "01", "part_1": "1ms", "part_2": null, "part_3": null, "total_nanos": 1000000000 }] }"#.to_string();
             let timings = Timings::try_from(json).unwrap();
             assert_eq!(timings.data.len(), 1);
             let timing = timings.data.first().unwrap();
@@ -253,7 +272,7 @@ mod tests {
         #[test]
         fn serializes_timings() {
             let timings = get_mock_timings();
-            let value = JsonValue::from(timings);
+            let value = JsonValue::try_from(timings).unwrap();
             assert_eq!(
                 value
                     .get::<HashMap<String, JsonValue>>()
@@ -281,11 +300,12 @@ mod tests {
                     day: day!(1),
                     part_1: Some("1ms".into()),
                     part_2: Some("2ms".into()),
-                    total_nanos: 3_000_000_000_f64,
+                    part_3: Some("3ms".into()),
+                    total_nanos: 6_000_000_000_f64,
                 }],
             };
 
-            assert!(timings.is_day_complete(day!(1)));
+            assert_eq!(timings.is_day_complete(day!(1).clone()), true);
         }
 
         #[test]
@@ -295,11 +315,12 @@ mod tests {
                     day: day!(1),
                     part_1: Some("1ms".into()),
                     part_2: None,
+                    part_3: None,
                     total_nanos: 1_000_000_000_f64,
                 }],
             };
 
-            assert!(!timings.is_day_complete(day!(1)));
+            assert_eq!(timings.is_day_complete(day!(1).clone()), false);
         }
 
         #[test]
@@ -309,11 +330,12 @@ mod tests {
                     day: day!(1),
                     part_1: None,
                     part_2: None,
+                    part_3: None,
                     total_nanos: 0.0,
                 }],
             };
 
-            assert!(!timings.is_day_complete(day!(1)));
+            assert_eq!(timings.is_day_complete(day!(1).clone()), false);
         }
     }
 
@@ -333,6 +355,7 @@ mod tests {
                     day: day!(3),
                     part_1: None,
                     part_2: None,
+                    part_3: None,
                     total_nanos: 0_f64,
                 }],
             };
@@ -353,6 +376,7 @@ mod tests {
                     day: day!(2),
                     part_1: None,
                     part_2: None,
+                    part_3: None,
                     total_nanos: 0_f64,
                 }],
             };
